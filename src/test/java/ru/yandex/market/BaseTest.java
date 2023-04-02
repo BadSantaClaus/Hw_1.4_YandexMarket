@@ -12,7 +12,11 @@ import java.util.concurrent.TimeUnit;
  * @author Горячев Роман Юрьевич
  */
 public class BaseTest {
-
+    /**
+     * Вебдрайвер
+     *
+     * @author Горячев Роман Юрьевич
+     */
     protected WebDriver webDriver;
     /**
      * Метод используется для задания парметров драйвера перед запуском каждого теста
@@ -28,7 +32,6 @@ public class BaseTest {
         webDriver.manage().window().maximize();
         webDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
-
     /**
      * Метод используется для задания парметров драйвера после запуска каждого теста
      * @author Горячев Роман Юрьевич

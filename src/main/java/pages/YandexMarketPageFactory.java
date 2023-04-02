@@ -122,6 +122,12 @@ public class YandexMarketPageFactory {
      * @author Горячев Роман Юрьевич
      * @param webDriver драйвер
      */
+    /**
+     * Конструктор создания обьектов YandexMarketPageFactory
+     *
+     * @author Горячев Роман Юрьевич
+     * @param webDriver драйвер
+     */
     public YandexMarketPageFactory(WebDriver webDriver) {
         this.webDriver = webDriver;
         wait = new WebDriverWait(webDriver, 30);
@@ -178,6 +184,31 @@ public class YandexMarketPageFactory {
         webDriver.get(webDriver.getCurrentUrl().substring(0, webDriver.getCurrentUrl().length() - 2) + pageNumber);
     }
     /**
+     * Метод для получения списка заголовков результатов поиска
+     *
+     * @author Горячев Роман Юрьевич
+     * @param numberOfArticle Порядковый номер результатов поиска
+     */
+    public String getCurrentTitle(int numberOfArticle) {
+        System.out.println(getTitleXpath());
+        return webDriver.findElements(By.xpath(getTitleXpath())).get(numberOfArticle - 1).getText();
+    }
+    /**
+     * Метод для получения динамическоого XPath элемента с заголовками результатов поиска
+     *
+     * @author Горячев Роман Юрьевич
+     * @return XPath с заголовками результатов поиска
+     */
+    public String getTitleXpath(){
+        StringBuilder xPath = new StringBuilder();
+        if(webDriver.findElements(By.xpath("//a[@data-baobab-name='title']")).size() > 0) {
+            return xPath.append("//a[@data-baobab-name='title']").toString();
+        } else if (webDriver.findElements(By.xpath("//h3[@data-baobab-name='title']")).size() > 0){
+            return xPath.append("//h3[@data-baobab-name='title']").toString();
+        } else return xPath.append("//h3[@data-zone-name='title']").toString();
+
+    }
+    /**
      * Метод для ожидания прогрузки страницы
      *
      * @author Горячев Роман Юрьевич
@@ -191,7 +222,7 @@ public class YandexMarketPageFactory {
                 try {
                     waiting = loading.getAttribute("id");
                 } catch (StaleElementReferenceException staleElementReferenceException) {
-                    staleElementReferenceException.printStackTrace();
+                    System.out.println("Stale");;
                 }
                 if (attribute.equals(waiting)) {
                     try {

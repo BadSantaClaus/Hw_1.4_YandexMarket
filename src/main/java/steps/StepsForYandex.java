@@ -26,7 +26,6 @@ public class StepsForYandex {
     @Step("Переходим в категорию : {categoryName}")
     public static void moveToCategory(String catalogueSection, String categoryName, WebDriver webDriver) {
         YandexMarketPageFactory yandexMarketPageFactory = PageFactory.initElements(webDriver, YandexMarketPageFactory.class);
-        WebDriverWait wait = new WebDriverWait(webDriver, 10);
         yandexMarketPageFactory.moveToCategoryByName(catalogueSection, categoryName, webDriver);
     }
     /**
@@ -45,12 +44,14 @@ public class StepsForYandex {
         WebDriverWait wait = new WebDriverWait(webDriver, 10);
         Actions action = new Actions(webDriver);
         wait.until(ExpectedConditions.elementToBeClickable(yandexMarketPageFactory.getPriceFrom()));
+        String attribute = yandexMarketPageFactory.getLoading().getAttribute("id");
         action.click(yandexMarketPageFactory.getPriceFrom()).sendKeys(String.valueOf(priceMin)).perform();
         action.click(yandexMarketPageFactory.getPriceTo()).sendKeys(String.valueOf(priceMax)).perform();
-        wait.until(ExpectedConditions.elementToBeClickable(webDriver.findElement(By.xpath("//span[text() = '" + producer1 + "']"))));
-        webDriver.findElement(By.xpath("//span[text() = '" + producer1 + "']")).click();
-        webDriver.findElement(By.xpath("//span[text() = '" + producer2 + "']")).click();
-        yandexMarketPageFactory.waitYandexResultsMarketPage(yandexMarketPageFactory.getLoading().getAttribute("id"), 600);
+        wait.until(ExpectedConditions.elementToBeClickable( webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[text() = '" + producer1 + "']"))));
+        webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[text() = '" + producer1 + "']")).click();
+        wait.until(ExpectedConditions.elementToBeClickable(webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[text() = '" + producer2 + "']"))));
+        webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[text() = '" + producer2 + "']")).click();
+        yandexMarketPageFactory.waitYandexResultsMarketPage(attribute, 600);
     }
     /**
      * Метод используется для возвращения на заданную страницу после поиска
@@ -78,7 +79,7 @@ public class StepsForYandex {
         YandexMarketPageFactory yandexMarketPageFactory = PageFactory.initElements(webDriver, YandexMarketPageFactory.class);
         WebDriverWait wait = new WebDriverWait(webDriver, 10);
         scrollToTheBottom(webDriver);
-        String title = yandexMarketPageFactory.getResultsArticleList().stream().limit(numberSearchResult).reduce((first, second) -> second).get().getText();
+        String title = yandexMarketPageFactory.getCurrentTitle(numberSearchResult);
         String attribute = yandexMarketPageFactory.getLoading().getAttribute("id");
         wait.until(ExpectedConditions.elementToBeClickable(yandexMarketPageFactory.getSearchField()));
         yandexMarketPageFactory.getAction().click(yandexMarketPageFactory.getSearchField()).sendKeys(title).perform();
