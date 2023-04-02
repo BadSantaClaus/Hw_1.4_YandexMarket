@@ -17,7 +17,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  */
 public class Tests extends BaseTest {
     /**
-     * Метод используется для запуска теста "Проверка сайта ЯндексМаркет"
+     * Метод для запуска теста "Проверка сайта ЯндексМаркет"
      *
      * @param catalogueSection наименование раздела каталога
      * @param categoryName наименование категории

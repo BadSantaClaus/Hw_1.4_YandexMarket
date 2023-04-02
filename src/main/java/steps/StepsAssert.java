@@ -4,11 +4,12 @@ import helpers.Assertions;
 import helpers.Properties;
 import io.qameta.allure.Step;
 import org.openqa.selenium.*;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.YandexMarketPageFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static steps.StepsAll.*;
 
@@ -56,6 +57,7 @@ public class StepsAssert {
     public static void checkingResultsArticles(String title, WebDriver webDriver) {
         YandexMarketPageFactory yandexMarketPageFactory = PageFactory.initElements(webDriver, YandexMarketPageFactory.class);
         scrollToTheBottom(webDriver);
+        checkingNoSuchGoods(yandexMarketPageFactory);
         Assertions.assertTrue(yandexMarketPageFactory.getResultsArticleList().stream().anyMatch(x -> x.getText().contains(title)),
                 "Страница результатов поиска не содержит поисковый запрос");
     }
@@ -70,9 +72,10 @@ public class StepsAssert {
     @Step("Проверяем, что результаты поиска содержат: {producer1}, {producer2}")
     public static void checkingResultsArticles(String producer1, String producer2, WebDriver webDriver) {
         YandexMarketPageFactory yandexMarketPageFactory = PageFactory.initElements(webDriver, YandexMarketPageFactory.class);
+        List<WebElement> articles = new ArrayList<>();
         for (int i = 0; i < yandexMarketPageFactory.getResultsArticleList().size(); i++) {
-            Assertions.assertTrue(yandexMarketPageFactory.getResultsArticleList().get(i).getText().toLowerCase().contains(producer1.toLowerCase())
-                            || yandexMarketPageFactory.getResultsArticleList().get(i).getText().toLowerCase().contains(producer2.toLowerCase()),
+            Assertions.assertTrue(articles.get(i).getText().toLowerCase().contains(producer1.toLowerCase())
+                            || articles.get(i).getText().toLowerCase().contains(producer2.toLowerCase()),
                     "Результаты поиска не содержат: " + producer1 + " или " + producer2 + " в статье номер " + i);
         }
     }
@@ -87,9 +90,10 @@ public class StepsAssert {
     @Step("Проверяем, что результаты поиска находятся в диапазоне цен: {priceMin}, {priceMax}")
     public static void checkingResultsPrices(int priceMin, int priceMax, WebDriver webDriver) {
         YandexMarketPageFactory yandexMarketPageFactory = PageFactory.initElements(webDriver, YandexMarketPageFactory.class);
+        List <Integer> prices = yandexMarketPageFactory.getResultsPrices();
         for (int i = 0; i < yandexMarketPageFactory.getResultsPrices().size(); i++) {
-            Assertions.assertTrue(yandexMarketPageFactory.getResultsPrices().get(i)
-                            >= priceMin && yandexMarketPageFactory.getResultsPrices().get(i) <= priceMax,
+            Assertions.assertTrue(prices.get(i)
+                            >= priceMin && prices.get(i) <= priceMax,
                     "Результаты поиска выходят из диапазона цен: от " + priceMin + " до " + priceMax + " в статье номер " + i);
         }
     }
@@ -106,18 +110,32 @@ public class StepsAssert {
     @Step("Проверяем, что результаты поиска находятся в диапазоне цен: от {priceMin} до {priceMax} и содержат производителей: {producer1}, {producer2}")
     public static void checkResultsFilter(int priceMin, int priceMax, String producer1, String producer2, WebDriver webDriver) {
         YandexMarketPageFactory yandexMarketPageFactory = PageFactory.initElements(webDriver, YandexMarketPageFactory.class);
-        Actions actions = new Actions(webDriver);
+        checkingNoSuchGoods(yandexMarketPageFactory);
         while (true) {
-//            checkingResultsArticles(producer1, producer2, webDriver);
-//            checkingResultsPrices(priceMin, priceMax, webDriver);
+            checkingResultsArticles(producer1, producer2, webDriver);
+            checkingResultsPrices(priceMin, priceMax, webDriver);
             if (yandexMarketPageFactory.getPager().getText().contains("Вперёд")) {
                 yandexMarketPageFactory.getWait().until(ExpectedConditions.elementToBeClickable(yandexMarketPageFactory.getForward()));
-                String attribute = yandexMarketPageFactory.getLoading().getAttribute("id");
-                actions.moveToElement(yandexMarketPageFactory.getForward()).click(yandexMarketPageFactory.getForward()).perform();
+                String attribute = yandexMarketPageFactory.getChangeableElement().getAttribute("id");
+                yandexMarketPageFactory.getAction().moveToElement(yandexMarketPageFactory.getForward()).click(yandexMarketPageFactory.getForward()).perform();
                 scrollToTheBottom(webDriver);
                 yandexMarketPageFactory.waitYandexResultsMarketPage(attribute, Properties.testsProperties.maxWaitAttempts());
                 scrollToTheBottom(webDriver);
             } else break;
+        }
+    }
+    /**
+     * Метод для мониторинга видимости элемента, когда на странице нет ни одногоподходящего подходящего фильтра товара
+     *
+     * @author Горячев Роман Юрьевич
+     * @return XPath с заголовками результатов поиска
+     */
+    public static void checkingNoSuchGoods(YandexMarketPageFactory yandexMarketPageFactory){
+        //
+        System.out.println("noSuchGoods");
+        //
+        if(yandexMarketPageFactory.getNoSuchGoods().size() > 0){
+            Assertions.assertTrue(false, "На странице нет ни одного подходящего под фильтры товара");
         }
     }
 }

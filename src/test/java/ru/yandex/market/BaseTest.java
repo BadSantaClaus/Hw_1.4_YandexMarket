@@ -12,13 +12,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class BaseTest {
     /**
-     * Вебдрайвер
+     * драйвер
      *
      * @author Горячев Роман Юрьевич
      */
     protected WebDriver webDriver;
     /**
-     * Метод используется для задания парметров драйвера перед запуском каждого теста
+     * Метод для задания парметров драйвера перед запуском каждого теста
      * @author Горячев Роман Юрьевич
      */
     @BeforeEach
@@ -32,11 +32,11 @@ public class BaseTest {
         webDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
     /**
-     * Метод используется для задания парметров драйвера после запуска каждого теста
+     * Метод для задания парметров драйвера после запуска каждого теста
      * @author Горячев Роман Юрьевич
      */
     @AfterEach
     public void afterEachTest() {
-//        webDriver.quit();
+        webDriver.quit();
     }
 }

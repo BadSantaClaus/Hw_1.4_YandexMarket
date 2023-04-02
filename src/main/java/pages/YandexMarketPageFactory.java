@@ -1,7 +1,6 @@
 package pages;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
@@ -9,12 +8,14 @@ import org.openqa.selenium.support.How;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static steps.StepsAssert.checkingNoSuchGoods;
+
 /**
- * Класс используется для задания переменных и методов для паттерна PageFactory
+ * Класс используется для задания переменных и методов на странице ЯндексМаркета в паттерне PageFactory
  *
  * @author Горячев Роман Юрьевич
  */
@@ -40,12 +41,13 @@ public class YandexMarketPageFactory {
      */
     private Actions action;
     /**
-     * Элемент страницы для ожидания прогрузки страницы
+     * Элемент страницы, который меняет значени атрибута "id" при изменении фильтров или переходе на другую страницу результатов поиска
      *
      * @author Горячев Роман Юрьевич
      */
     @FindBy(how = How.XPATH, using = "//main[@id='searchResults']/div")
-    private WebElement loading;
+    private WebElement changeableElement;
+
     /**
      * Элемент страницы  - каталог
      *
@@ -103,25 +105,26 @@ public class YandexMarketPageFactory {
     @FindBy(how = How.XPATH, using = "//nav[@aria-label='Вы здесь']")
     private List<WebElement> currentCategoryList;
     /**
-     * Список блоков результатов поиска
+     * Список элементов, содержащий блок "Нет походящих товаров"
+     *
+     * @author Горячев Роман Юрьевич
+     */
+    @FindBy(how = How.XPATH, using = "//h2[text()='Нет подходящих товаров']")
+    private List <WebElement> noSuchGoods;
+    /**
+     * Список результатов поиска
      *
      * @author Горячев Роман Юрьевич
      */
     @FindBy(how = How.XPATH, using = "//article")
     private List<WebElement> resultsArticleList;
     /**
-     * Список цен из блоков результатов поиска
+     * Список цен результатов поиска
      *
      * @author Горячев Роман Юрьевич
      */
     @FindBy(how = How.XPATH, using = "//article//div[@data-zone-name='price']")
     private List<WebElement> resultsPriceList;
-    /**
-     * Конструктор создания обьектов YandexMarketPageFactory
-     *
-     * @author Горячев Роман Юрьевич
-     * @param webDriver драйвер
-     */
     /**
      * Конструктор создания обьектов YandexMarketPageFactory
      *
@@ -149,10 +152,10 @@ public class YandexMarketPageFactory {
         webDriver.findElement(By.xpath("//a[text() = '" + categoryName + "']")).click();
     }
     /**
-     * Конструктор создания обьектов YandexMarketPageFactory
+     * Метод для получения текущей категории
      *
      * @author Горячев Роман Юрьевич
-     * @return обьект YandexMarketPageFactory
+     * @return строку с текущей категорией
      */
     public String getCurrentCategory() {
         String currentCategory = Arrays.asList(currentCategoryList.get(0).getText().split("\\r?\\n")).stream()
@@ -160,7 +163,7 @@ public class YandexMarketPageFactory {
         return currentCategory;
     }
     /**
-     * Метод для получения списка цен из блоков результатов поиска
+     * Метод для получения списка цен из результатов поиска
      *
      * @author Горячев Роман Юрьевич
      * @return обьект список цен из блоков результатов поиска
@@ -199,7 +202,7 @@ public class YandexMarketPageFactory {
         return webDriver.findElements(By.xpath(getTitleXpath())).get(numberOfArticle - 1).getText();
     }
     /**
-     * Метод для получения динамическоого XPath элемента с заголовками результатов поиска
+     * Метод для получения XPath элемента с заголовками результатов поиска
      *
      * @author Горячев Роман Юрьевич
      * @return XPath с заголовками результатов поиска
@@ -213,27 +216,28 @@ public class YandexMarketPageFactory {
         } else return xPath.append("//h3[@data-zone-name='title']").toString();
     }
     /**
-     * Метод для ожидания прогрузки страницы
+     * Метод для ожидания прогрузки страницы, основанный на изименении id элемента страницы
      *
      * @author Горячев Роман Юрьевич
      * @param attribute Элемент до перезагрузки страницы для сравнения с с элементом после
      * @param maxWaitAttempts Максимальное количество попыток ожидания
      */
     public void waitYandexResultsMarketPage(String attribute, int maxWaitAttempts) {
+        checkingNoSuchGoods(PageFactory.initElements(webDriver, YandexMarketPageFactory.class));
         for (int i = 0; i <= maxWaitAttempts; i++) {
             if (i != maxWaitAttempts) {
-                StringBuilder waiting = new StringBuilder();
-                try {
-                    waiting.append(loading.getAttribute("id"));
-                } catch (StaleElementReferenceException staleElementReferenceException) {
-                }
-                if (attribute.contains(waiting.toString())) {
+                    StringBuilder waiting = new StringBuilder();
                     try {
-                        Thread.sleep(5);
-                    } catch (InterruptedException interruptedException) {
-                        interruptedException.printStackTrace();
+                        waiting.append(changeableElement.getAttribute("id"));
+                    } catch (StaleElementReferenceException staleElementReferenceException) {
                     }
-                } else break;
+                    if (attribute.contains(waiting.toString())) {
+                        try {
+                            Thread.sleep(5);
+                        } catch (InterruptedException interruptedException) {
+                            interruptedException.printStackTrace();
+                        }
+                    } else break;
             } else throw new TimeoutException();
         }
     }

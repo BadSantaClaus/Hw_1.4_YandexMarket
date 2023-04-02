@@ -3,7 +3,7 @@ package helpers;
 import org.junit.jupiter.params.provider.Arguments;
 import java.util.stream.Stream;
 /**
- * Класс для предоставления аргурментов методам
+ * Класс для предоставления аргурментов тестам
  *
  * @author Горячев Роман Юрьевич
  */
@@ -12,7 +12,7 @@ public class DataProvider {
      * Метод для задания аргументов, которые будут переданы в тест
      *
      * @author Горячев Роман Юрьевич
-     * @return список аргументов для прохождения теста
+     * @return стрим аргументов для прохождения теста
      */
     public static Stream<Arguments> provideTestYandexMarket() {
         return Stream.of(
