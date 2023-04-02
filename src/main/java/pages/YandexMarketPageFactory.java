@@ -174,14 +174,20 @@ public class YandexMarketPageFactory {
         return priceList;
     }
     /**
-     * Метод для возвращения на страницу с заданным номером
+     * Метод для возвращения на страницу с заданным номером. Если мы находимся на первой странице, то ничего не проиходит
      *
      * @author Горячев Роман Юрьеви
      * @param pageNumber номер страницы для возвращения после проверки результатов поиска
      * @param webDriver драйвер
      */
-    public void returnToPage(int pageNumber, WebDriver webDriver) {
-        webDriver.get(webDriver.getCurrentUrl().substring(0, webDriver.getCurrentUrl().length() - 2) + pageNumber);
+    public boolean returnToPage(int pageNumber, WebDriver webDriver) {
+        String currentUrl = webDriver.getCurrentUrl();
+        if(webDriver.getCurrentUrl().contains("page")){
+            String newUrl = currentUrl.substring(0, webDriver.getCurrentUrl().lastIndexOf("=") + 1);
+            webDriver.get(newUrl + pageNumber);
+            return true;
+        }
+        return false;
     }
     /**
      * Метод для получения списка заголовков результатов поиска
@@ -190,7 +196,6 @@ public class YandexMarketPageFactory {
      * @param numberOfArticle Порядковый номер результатов поиска
      */
     public String getCurrentTitle(int numberOfArticle) {
-        System.out.println(getTitleXpath());
         return webDriver.findElements(By.xpath(getTitleXpath())).get(numberOfArticle - 1).getText();
     }
     /**
@@ -206,7 +211,6 @@ public class YandexMarketPageFactory {
         } else if (webDriver.findElements(By.xpath("//h3[@data-baobab-name='title']")).size() > 0){
             return xPath.append("//h3[@data-baobab-name='title']").toString();
         } else return xPath.append("//h3[@data-zone-name='title']").toString();
-
     }
     /**
      * Метод для ожидания прогрузки страницы
@@ -218,13 +222,12 @@ public class YandexMarketPageFactory {
     public void waitYandexResultsMarketPage(String attribute, int maxWaitAttempts) {
         for (int i = 0; i <= maxWaitAttempts; i++) {
             if (i != maxWaitAttempts) {
-                String waiting = "";
+                StringBuilder waiting = new StringBuilder();
                 try {
-                    waiting = loading.getAttribute("id");
+                    waiting.append(loading.getAttribute("id"));
                 } catch (StaleElementReferenceException staleElementReferenceException) {
-                    System.out.println("Stale");;
                 }
-                if (attribute.equals(waiting)) {
+                if (attribute.contains(waiting.toString())) {
                     try {
                         Thread.sleep(5);
                     } catch (InterruptedException interruptedException) {

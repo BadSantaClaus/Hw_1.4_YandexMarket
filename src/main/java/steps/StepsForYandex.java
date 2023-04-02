@@ -2,6 +2,8 @@ package steps;
 
 import static steps.StepsAll.*;
 import static steps.StepsAssert.*;
+
+import helpers.Properties;
 import io.qameta.allure.Step;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
@@ -41,17 +43,15 @@ public class StepsForYandex {
     @Step("Устаналвиваем цену от {minPrice} до {maxPrice} и производителей: {producer1}, {producer2}")
     public static void setFilter(String producer1, String producer2, int priceMin, int priceMax, WebDriver webDriver) {
         YandexMarketPageFactory yandexMarketPageFactory = PageFactory.initElements(webDriver, YandexMarketPageFactory.class);
-        WebDriverWait wait = new WebDriverWait(webDriver, 10);
-        Actions action = new Actions(webDriver);
-        wait.until(ExpectedConditions.elementToBeClickable(yandexMarketPageFactory.getPriceFrom()));
+        yandexMarketPageFactory.getWait().until(ExpectedConditions.elementToBeClickable(yandexMarketPageFactory.getPriceFrom()));
         String attribute = yandexMarketPageFactory.getLoading().getAttribute("id");
-        action.click(yandexMarketPageFactory.getPriceFrom()).sendKeys(String.valueOf(priceMin)).perform();
-        action.click(yandexMarketPageFactory.getPriceTo()).sendKeys(String.valueOf(priceMax)).perform();
-        wait.until(ExpectedConditions.elementToBeClickable( webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[text() = '" + producer1 + "']"))));
+        yandexMarketPageFactory.getAction().click(yandexMarketPageFactory.getPriceFrom()).sendKeys(String.valueOf(priceMin)).perform();
+        yandexMarketPageFactory.getAction().click(yandexMarketPageFactory.getPriceTo()).sendKeys(String.valueOf(priceMax)).perform();
+        yandexMarketPageFactory.getWait().until(ExpectedConditions.elementToBeClickable( webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[text() = '" + producer1 + "']"))));
         webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[text() = '" + producer1 + "']")).click();
-        wait.until(ExpectedConditions.elementToBeClickable(webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[text() = '" + producer2 + "']"))));
+        yandexMarketPageFactory.getWait().until(ExpectedConditions.elementToBeClickable(webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[text() = '" + producer2 + "']"))));
         webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[text() = '" + producer2 + "']")).click();
-        yandexMarketPageFactory.waitYandexResultsMarketPage(attribute, 600);
+        yandexMarketPageFactory.waitYandexResultsMarketPage(attribute, Properties.testsProperties.maxWaitAttempts());
     }
     /**
      * Метод используется для возвращения на заданную страницу после поиска
@@ -64,8 +64,9 @@ public class StepsForYandex {
     public static void returnToPage(int pageNumber, WebDriver webDriver) {
         YandexMarketPageFactory yandexMarketPageFactory = PageFactory.initElements(webDriver, YandexMarketPageFactory.class);
         String attribute = yandexMarketPageFactory.getLoading().getAttribute("id");
-        yandexMarketPageFactory.returnToPage(pageNumber,webDriver);
-        yandexMarketPageFactory.waitYandexResultsMarketPage(attribute, 1000);
+        if(yandexMarketPageFactory.returnToPage(pageNumber, webDriver)){
+            yandexMarketPageFactory.waitYandexResultsMarketPage(attribute, Properties.testsProperties.maxWaitAttempts());
+        }
     }
     /**
      * Метод используется для ввода наименования из результатов поиска с заданным порядковым номером в поисковую строку
@@ -77,15 +78,14 @@ public class StepsForYandex {
     @Step("Вводим название из резулататов поиска с порядковым номером: {numberSearchResult} в поискокую строку")
     public static void enterTitleToSearchFieldWithChecking(int numberSearchResult, WebDriver webDriver) {
         YandexMarketPageFactory yandexMarketPageFactory = PageFactory.initElements(webDriver, YandexMarketPageFactory.class);
-        WebDriverWait wait = new WebDriverWait(webDriver, 10);
         scrollToTheBottom(webDriver);
         String title = yandexMarketPageFactory.getCurrentTitle(numberSearchResult);
         String attribute = yandexMarketPageFactory.getLoading().getAttribute("id");
-        wait.until(ExpectedConditions.elementToBeClickable(yandexMarketPageFactory.getSearchField()));
+        yandexMarketPageFactory.getWait().until(ExpectedConditions.elementToBeClickable(yandexMarketPageFactory.getSearchField()));
         yandexMarketPageFactory.getAction().click(yandexMarketPageFactory.getSearchField()).sendKeys(title).perform();
-        wait.until(ExpectedConditions.elementToBeClickable(yandexMarketPageFactory.getFindButton()));
+        yandexMarketPageFactory.getWait().until(ExpectedConditions.elementToBeClickable(yandexMarketPageFactory.getFindButton()));
         yandexMarketPageFactory.getFindButton().click();
-        yandexMarketPageFactory.waitYandexResultsMarketPage(attribute, 1000);
+        yandexMarketPageFactory.waitYandexResultsMarketPage(attribute, Properties.testsProperties.maxWaitAttempts());
         checkingResultsArticles(title, webDriver);
     }
 }

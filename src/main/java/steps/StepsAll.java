@@ -27,6 +27,6 @@ public class StepsAll {
      */
     public static void scrollToTheBottom(WebDriver webDriver) {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)");
+        javascriptExecutor.executeScript("window.scrollTo(0, 11500)");
     }
 }

@@ -1,6 +1,7 @@
 package steps;
 
 import helpers.Assertions;
+import helpers.Properties;
 import io.qameta.allure.Step;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
@@ -105,17 +106,16 @@ public class StepsAssert {
     @Step("Проверяем, что результаты поиска находятся в диапазоне цен: от {priceMin} до {priceMax} и содержат производителей: {producer1}, {producer2}")
     public static void checkResultsFilter(int priceMin, int priceMax, String producer1, String producer2, WebDriver webDriver) {
         YandexMarketPageFactory yandexMarketPageFactory = PageFactory.initElements(webDriver, YandexMarketPageFactory.class);
-        WebDriverWait wait = new WebDriverWait(webDriver, 30);
         Actions actions = new Actions(webDriver);
         while (true) {
 //            checkingResultsArticles(producer1, producer2, webDriver);
 //            checkingResultsPrices(priceMin, priceMax, webDriver);
             if (yandexMarketPageFactory.getPager().getText().contains("Вперёд")) {
-                wait.until(ExpectedConditions.elementToBeClickable(yandexMarketPageFactory.getForward()));
+                yandexMarketPageFactory.getWait().until(ExpectedConditions.elementToBeClickable(yandexMarketPageFactory.getForward()));
                 String attribute = yandexMarketPageFactory.getLoading().getAttribute("id");
                 actions.moveToElement(yandexMarketPageFactory.getForward()).click(yandexMarketPageFactory.getForward()).perform();
                 scrollToTheBottom(webDriver);
-                yandexMarketPageFactory.waitYandexResultsMarketPage(attribute, 600);
+                yandexMarketPageFactory.waitYandexResultsMarketPage(attribute, Properties.testsProperties.maxWaitAttempts());
                 scrollToTheBottom(webDriver);
             } else break;
         }

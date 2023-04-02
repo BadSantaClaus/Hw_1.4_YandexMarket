@@ -13,10 +13,17 @@ import org.aeonbits.owner.Config;
 })
 public interface TestsProperties extends Config{
     /**
-     * Абстрактный метод для получения доступа к заданному аттрибуту из настроек
+     * Абстрактный метод для получения доступа к url страницы
      *
      * @author Горячев Роман Юрьевич
      */
     @Config.Key("yandexmarket.url")
     String yandexmarketUrl();
+    /**
+     * Абстрактный метод для получения доступа к максимальному числу попыток ожидания обновления элемента старницы
+     *
+     * @author Горячев Роман Юрьевич
+     */
+    @Config.Key("maxWaitAttempts")
+    int maxWaitAttempts();
 }
