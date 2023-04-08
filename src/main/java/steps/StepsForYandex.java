@@ -1,9 +1,9 @@
 package steps;
 
-import static steps.StepsAll.*;
+import static steps.StepsAll.scrollToTheBottom;
 import static steps.StepsAssert.*;
-
 import helpers.Properties;
+import helpers.Screenshoter;
 import io.qameta.allure.Step;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.PageFactory;
@@ -27,12 +27,13 @@ public class StepsForYandex {
     public static void moveToCategory(String catalogueSection, String categoryName, WebDriver webDriver) {
         YandexMarketPageFactory yandexMarketPageFactory = PageFactory.initElements(webDriver, YandexMarketPageFactory.class);
         yandexMarketPageFactory.moveToCategoryByName(catalogueSection, categoryName, webDriver);
+        Screenshoter.getScreen(webDriver);
     }
     /**
      * Метод для задания фильтров поиска по ограничению минимальной и максимальной цены, а также двум производителям
      *
      * @author Горячев Роман Юрьевич
-     * @param producer1 произовдитель
+     * @param producer1 производитель
      * @param producer2 производитель
      * @param priceMin минимальная цена
      * @param priceMax максимальная цена
@@ -45,10 +46,11 @@ public class StepsForYandex {
         String attribute = yandexMarketPageFactory.getChangeableElement().getAttribute("id");
         yandexMarketPageFactory.getAction().click(yandexMarketPageFactory.getPriceFrom()).sendKeys(String.valueOf(priceMin)).perform();
         yandexMarketPageFactory.getAction().click(yandexMarketPageFactory.getPriceTo()).sendKeys(String.valueOf(priceMax)).perform();
-        yandexMarketPageFactory.getWait().until(ExpectedConditions.elementToBeClickable( webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[text() = '" + producer1 + "']"))));
-        webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[text() = '" + producer1 + "']")).click();
-        yandexMarketPageFactory.getWait().until(ExpectedConditions.elementToBeClickable(webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[text() = '" + producer2 + "']"))));
-        webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[text() = '" + producer2 + "']")).click();
+        yandexMarketPageFactory.getAction().click(webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[translate(.,'ABCDEFGHIJKLMNOPQRSTUVWXYZАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'," +
+                "'abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя')='" + producer1.toLowerCase() + "']")))
+                .click(webDriver.findElement(By.xpath("//div[@data-grabber='SearchFilters']//span[translate(.,'ABCDEFGHIJKLMNOPQRSTUVWXYZАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'," +
+                        "'abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя')='" + producer2.toLowerCase() + "']"))).perform();
+        Screenshoter.getScreen(webDriver);
         yandexMarketPageFactory.waitYandexResultsMarketPage(attribute, Properties.testsProperties.maxWaitAttempts());
     }
     /**
@@ -65,9 +67,11 @@ public class StepsForYandex {
         if(yandexMarketPageFactory.returnToPage(pageNumber, webDriver)){
             yandexMarketPageFactory.waitYandexResultsMarketPage(attribute, Properties.testsProperties.maxWaitAttempts());
         }
+        Screenshoter.getScreen(webDriver, yandexMarketPageFactory.getPager());
     }
     /**
-     * Метод используется для ввода наименования из результатов поиска с заданным порядковым номером в поисковую строку
+     * Метод для ввода наименования из результатов поиска с заданным порядковым номером в поисковую строку
+     * и последующей проверкой на содержание данного наименования в результатах поиска
      *
      * @author Горячев Роман Юрьевич
      * @param numberSearchResult порядковый номер результата поиск
@@ -77,14 +81,15 @@ public class StepsForYandex {
     public static void enterTitleToSearchFieldWithChecking(int numberSearchResult, WebDriver webDriver) {
         YandexMarketPageFactory yandexMarketPageFactory = PageFactory.initElements(webDriver, YandexMarketPageFactory.class);
         scrollToTheBottom(webDriver);
-        String title = yandexMarketPageFactory.getCurrentTitle(numberSearchResult);
+        String title = yandexMarketPageFactory.getTitles().get(numberSearchResult - 1).getText();
+        Screenshoter.getScreen(webDriver, yandexMarketPageFactory.getTitles().get(numberSearchResult - 1));
         String attribute = yandexMarketPageFactory.getChangeableElement().getAttribute("id");
         yandexMarketPageFactory.getWait().until(ExpectedConditions.elementToBeClickable(yandexMarketPageFactory.getSearchField()));
         yandexMarketPageFactory.getAction().click(yandexMarketPageFactory.getSearchField()).sendKeys(title).perform();
         yandexMarketPageFactory.getWait().until(ExpectedConditions.elementToBeClickable(yandexMarketPageFactory.getFindButton()));
         yandexMarketPageFactory.getFindButton().click();
         yandexMarketPageFactory.waitYandexResultsMarketPage(attribute, Properties.testsProperties.maxWaitAttempts());
-        checkingResultsArticles(title, webDriver);
+        checkTitles(title, webDriver);
     }
 }
 

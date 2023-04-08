@@ -10,7 +10,7 @@
 
     <properties>
         <junit.jupiter.version>5.7.0-M1</junit.jupiter.version>
-        <seleniumhq.selenium>3.141.59</seleniumhq.selenium>
+        <seleniumhq.selenium>4.1.3</seleniumhq.selenium>
         <qameta.allure>2.13.6</qameta.allure>
         <aspectj.version>1.9.4</aspectj.version>
         <allure.version>2.13.0</allure.version>

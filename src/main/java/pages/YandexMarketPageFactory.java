@@ -5,15 +5,12 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.How;
-import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static steps.StepsAssert.checkingNoSuchGoods;
-
 /**
  * Класс используется для задания переменных и методов на странице ЯндексМаркета в паттерне PageFactory
  *
@@ -21,7 +18,6 @@ import static steps.StepsAssert.checkingNoSuchGoods;
  */
 @Getter
 public class YandexMarketPageFactory {
-
     /**
      * Вебдрайвер
      *
@@ -47,7 +43,6 @@ public class YandexMarketPageFactory {
      */
     @FindBy(how = How.XPATH, using = "//main[@id='searchResults']/div")
     private WebElement changeableElement;
-
     /**
      * Элемент страницы  - каталог
      *
@@ -103,7 +98,25 @@ public class YandexMarketPageFactory {
      * @author Горячев Роман Юрьевич
      */
     @FindBy(how = How.XPATH, using = "//nav[@aria-label='Вы здесь']")
-    private List<WebElement> currentCategoryList;
+    private WebElement currentCategoryArea;
+    /**
+     * xpath названий результатов поиска
+     *
+     * @author Горячев Роман Юрьевич
+     */
+    private String titlesXpathVar1 = "//a[@data-baobab-name='title']";
+    /**
+     * xpath названий результатов поиска
+     *
+     * @author Горячев Роман Юрьевич
+     */
+    private String titlesXpathVar2 = "//h3[@data-baobab-name='title']";
+    /**
+     * xpath названий результатов поиска
+     *
+     * @author Горячев Роман Юрьевич
+     */
+    private String titlesXpathVar3 = "//h3[@data-zone-name='title']";
     /**
      * Список элементов, содержащий блок "Нет походящих товаров"
      *
@@ -133,7 +146,7 @@ public class YandexMarketPageFactory {
      */
     public YandexMarketPageFactory(WebDriver webDriver) {
         this.webDriver = webDriver;
-        wait = new WebDriverWait(webDriver, 30);
+        wait = new WebDriverWait(webDriver, Duration.ofSeconds(30));
         action = new Actions(webDriver);
     }
     /**
@@ -146,9 +159,12 @@ public class YandexMarketPageFactory {
      */
     public void moveToCategoryByName(String catalogueSection, String categoryName, WebDriver webDriver) {
         catalogue.click();
-        wait.until(ExpectedConditions.elementToBeClickable(webDriver.findElement(By.xpath("//span[text() = '" + catalogueSection + "']"))));
-        action.moveToElement(webDriver.findElement(By.xpath("//span[text() = '" + catalogueSection + "']"))).perform();
-        wait.until(ExpectedConditions.elementToBeClickable(webDriver.findElement(By.xpath("//a[text() = '" + categoryName + "']"))));
+        wait.until(ExpectedConditions.elementToBeClickable(webDriver.findElement(By.xpath("//span[translate(.,'ABCDEFGHIJKLMNOPQRSTUVWXYZАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'," +
+                "'abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя')='" + catalogueSection.toLowerCase() + "']"))));
+        action.moveToElement(webDriver.findElement(By.xpath("//span[translate(.,'ABCDEFGHIJKLMNOPQRSTUVWXYZАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'," +
+                "'abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя')='" + catalogueSection.toLowerCase() + "']"))).perform();
+        wait.until(ExpectedConditions.elementToBeClickable(webDriver.findElement(By.xpath("//a[translate(.,'ABCDEFGHIJKLMNOPQRSTUVWXYZАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'," +
+                "'abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя')='" + categoryName.toLowerCase() + "']"))));
         webDriver.findElement(By.xpath("//a[text() = '" + categoryName + "']")).click();
     }
     /**
@@ -158,7 +174,7 @@ public class YandexMarketPageFactory {
      * @return строку с текущей категорией
      */
     public String getCurrentCategory() {
-        String currentCategory = Arrays.asList(currentCategoryList.get(0).getText().split("\\r?\\n")).stream()
+        String currentCategory = Arrays.asList(currentCategoryArea.getText().split("\\r?\\n")).stream()
                 .reduce((first, second) -> second).toString();
         return currentCategory;
     }
@@ -166,12 +182,13 @@ public class YandexMarketPageFactory {
      * Метод для получения списка цен из результатов поиска
      *
      * @author Горячев Роман Юрьевич
-     * @return обьект список цен из блоков результатов поиска
+     * @return список цен результатов поиска в формате int
      */
-    public List<Integer> getResultsPrices() {
+    public List<Integer> getIntResultsPrices() {
         List<Integer> priceList = new ArrayList<>();
-        for (int i = 0; i < resultsPriceList.size(); i++) {
-            List<String> priceListString = Arrays.asList(resultsPriceList.get(i).getText().split("\\r?\\n"));
+        List<WebElement> beforePrices = resultsPriceList;
+        for (int i = 0; i < beforePrices.size(); i++) {
+            List<String> priceListString = Arrays.asList(beforePrices.get(i).getText().split("\\r?\\n"));
             priceList.add(Integer.parseInt(priceListString.get(0).replaceAll("[^a-zA-Z0-9]+", "")));
         }
         return priceList;
@@ -179,9 +196,10 @@ public class YandexMarketPageFactory {
     /**
      * Метод для возвращения на страницу с заданным номером. Если мы находимся на первой странице, то ничего не проиходит
      *
-     * @author Горячев Роман Юрьеви
-     * @param pageNumber номер страницы для возвращения после проверки результатов поиска
+     * @author Горячев Роман Юрьевич
+     * @param pageNumber номер страницы для возвращения
      * @param webDriver драйвер
+     * @return возвращает false если находимся на первой странице
      */
     public boolean returnToPage(int pageNumber, WebDriver webDriver) {
         String currentUrl = webDriver.getCurrentUrl();
@@ -193,37 +211,36 @@ public class YandexMarketPageFactory {
         return false;
     }
     /**
-     * Метод для получения списка заголовков результатов поиска
+     * Метод для получения списка заголовков
      *
      * @author Горячев Роман Юрьевич
-     * @param numberOfArticle Порядковый номер результатов поиска
+     * @return список заголовков результатов поиска
      */
-    public String getCurrentTitle(int numberOfArticle) {
-        return webDriver.findElements(By.xpath(getTitleXpath())).get(numberOfArticle - 1).getText();
+    public List<WebElement> getTitles() {
+        return webDriver.findElements(By.xpath(getTitleXpath()));
     }
     /**
-     * Метод для получения XPath элемента с заголовками результатов поиска
+     * Метод для получения xpath элемента с заголовками результатов поиска
      *
      * @author Горячев Роман Юрьевич
-     * @return XPath с заголовками результатов поиска
+     * @return xpath с заголовками результатов поиска
      */
     public String getTitleXpath(){
         StringBuilder xPath = new StringBuilder();
-        if(webDriver.findElements(By.xpath("//a[@data-baobab-name='title']")).size() > 0) {
-            return xPath.append("//a[@data-baobab-name='title']").toString();
-        } else if (webDriver.findElements(By.xpath("//h3[@data-baobab-name='title']")).size() > 0){
-            return xPath.append("//h3[@data-baobab-name='title']").toString();
-        } else return xPath.append("//h3[@data-zone-name='title']").toString();
+        if(webDriver.findElements(By.xpath(titlesXpathVar1)).size() > 0) {
+            return xPath.append(titlesXpathVar1).toString();
+        } else if (webDriver.findElements(By.xpath(titlesXpathVar2)).size() > 0){
+            return xPath.append(titlesXpathVar2).toString();
+        } else return xPath.append(titlesXpathVar3).toString();
     }
     /**
-     * Метод для ожидания прогрузки страницы, основанный на изименении id элемента страницы
+     * Метод для ожидания прогрузки страницы при обновлении фильтров или переходе на следующую страницу
      *
      * @author Горячев Роман Юрьевич
-     * @param attribute Элемент до перезагрузки страницы для сравнения с с элементом после
+     * @param attribute Элемент до загрузки страницы для сравнения с элементом после
      * @param maxWaitAttempts Максимальное количество попыток ожидания
      */
     public void waitYandexResultsMarketPage(String attribute, int maxWaitAttempts) {
-        checkingNoSuchGoods(PageFactory.initElements(webDriver, YandexMarketPageFactory.class));
         for (int i = 0; i <= maxWaitAttempts; i++) {
             if (i != maxWaitAttempts) {
                     StringBuilder waiting = new StringBuilder();

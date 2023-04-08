@@ -1,6 +1,6 @@
 package steps;
 
-
+import helpers.Screenshoter;
 import io.qameta.allure.Step;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -10,15 +10,15 @@ import org.openqa.selenium.WebDriver;
  * @author Горячев Роман Юрьевич
  */
 public class StepsAll {
-
     /**
      * Метод для перехода на заданный сайт
      *
      * @author Горячев Роман Юрьевич
      */
     @Step("Переходим на сайт: {url}")
-    public static void openSite(String url, WebDriver driver) {
-        driver.get(url);
+    public static void openSite(String url, WebDriver webDriver) {
+        webDriver.get(url);
+        Screenshoter.getScreen(webDriver);
     }
     /**
      * Метод для прокрутки страницы вниз
@@ -27,6 +27,6 @@ public class StepsAll {
      */
     public static void scrollToTheBottom(WebDriver webDriver) {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        javascriptExecutor.executeScript("window.scrollTo(0, 11500)");
+        javascriptExecutor.executeScript("window.scrollTo(0, 13000)");
     }
 }
