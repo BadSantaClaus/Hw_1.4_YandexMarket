@@ -16,7 +16,7 @@ public class DataProvider {
      */
     public static Stream<Arguments> provideTestYandexMarket() {
         return Stream.of(
-                Arguments.of("Ноутбуки и компьютеры", "Ноутбуки", "Huawei", "Lenovo", 10000, 25000, 12, 1, 1)
+                Arguments.of("Ноутбуки и компьютеры", "Ноутбуки", "Huawei", "Lenovo", 10000, 90000, 12, 1, 1)
         );
     }
 }
