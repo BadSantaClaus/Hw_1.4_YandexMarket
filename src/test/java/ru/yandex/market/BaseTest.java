@@ -8,6 +8,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import java.time.Duration;
 /**
  * Класс используется для настройки параметров драйвера
+ *
  * @author Горячев Роман Юрьевич
  */
 public class BaseTest {
@@ -19,6 +20,7 @@ public class BaseTest {
     protected WebDriver webDriver;
     /**
      * Метод для задания параметров драйвера перед запуском каждого теста
+     *
      * @author Горячев Роман Юрьевич
      */
     @BeforeEach
@@ -32,6 +34,7 @@ public class BaseTest {
     }
     /**
      * Метод для задания параметров драйвера после запуска каждого теста
+     * 
      * @author Горячев Роман Юрьевич
      */
     @AfterEach
